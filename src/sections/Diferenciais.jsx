@@ -53,8 +53,21 @@ export default function Diferenciais() {
   }, [])
 
   return (
-    <section ref={root} id="diferenciais" className="relative border-t border-white/6 py-28 lg:py-40">
-      <div className="mx-auto max-w-[1240px] px-6 lg:px-10">
+    <section ref={root} id="diferenciais" className="relative overflow-hidden border-t border-white/6 py-28 lg:py-40">
+      {/* vista aerea no crepusculo, bem apagada, so para dar textura */}
+      <div className="pointer-events-none absolute inset-x-0 top-0 h-[70%]">
+        <img
+          src="/img/aerea-crepusculo.jpg"
+          alt=""
+          aria-hidden="true"
+          loading="lazy"
+          decoding="async"
+          className="h-full w-full object-cover object-top opacity-[0.13]"
+        />
+        <div className="absolute inset-0 bg-gradient-to-b from-ink-950/70 via-ink-950/85 to-ink-950" />
+      </div>
+
+      <div className="relative mx-auto max-w-[1240px] px-6 lg:px-10">
         <Reveal><Eyebrow>Por que a Mario Dal Maso</Eyebrow></Reveal>
         <SplitText
           as="h2"

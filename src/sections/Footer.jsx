@@ -62,7 +62,7 @@ export default function Footer() {
             </div>
             <p className="mt-4 max-w-[34ch] text-[14.5px] leading-relaxed text-bone-100/45">
               Administração de condomínios, patrimônios e comercialização integrada em São Paulo
-              desde 1965.
+              desde 1960.
             </p>
             <div className="mt-7 flex gap-3">
               {Object.entries(CONTACT.social).map(([k, href]) => (

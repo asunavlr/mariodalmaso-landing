@@ -7,7 +7,9 @@ import { Cursor, Intro, ScrollVelocity } from './components/fx'
 import Nav from './sections/Nav'
 import Hero from './sections/Hero'
 import Empresa from './sections/Empresa'
+import Galeria from './sections/Galeria'
 import Servicos from './sections/Servicos'
+import Manifesto from './sections/Manifesto'
 import Diferenciais from './sections/Diferenciais'
 import Contato from './sections/Contato'
 import Footer from './sections/Footer'
@@ -117,9 +119,11 @@ export default function App() {
         <Hero />
         <VelocityBand />
         <Empresa />
+        <Galeria />
         <Servicos />
-        <VelocityBand />
+        <Manifesto />
         <Diferenciais />
+        <VelocityBand />
         <Contato />
       </main>
       <Footer />

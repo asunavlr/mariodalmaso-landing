@@ -9,7 +9,7 @@ function Logo({ className = '' }) {
       </span>
       <span className="hidden h-3.5 w-px bg-white/20 sm:block" />
       <span className="hidden text-[10px] uppercase tracking-[0.2em] text-bone-100/45 sm:block">
-        desde 1965
+        desde 1960
       </span>
     </a>
   )

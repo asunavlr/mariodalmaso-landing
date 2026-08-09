@@ -21,10 +21,19 @@ export default function Hero() {
         const c2 = l2.current ? splitChars(l2.current) : []
         gsap.set([l1.current, l2.current], { opacity: 1 })
 
+        const charIn = {
+          opacity: 0,
+          y: '0.55em',
+          rotateX: -60,
+          transformOrigin: '50% 100%',
+          duration: 1.3,
+          stagger: 0.016,
+        }
+
         const tl = gsap.timeline({ defaults: { ease: 'expo.out' } })
         tl.from('.hero-eyebrow', { opacity: 0, y: 16, duration: 1 }, 0.15)
-          .from(c1, { yPercent: 118, duration: 1.25, stagger: 0.016 }, 0.28)
-          .from(c2, { yPercent: 118, duration: 1.25, stagger: 0.016 }, 0.42)
+          .from(c1, charIn, 0.28)
+          .from(c2, charIn, 0.42)
           .from('.hero-lead', { opacity: 0, y: 22, duration: 1.1 }, 0.78)
           .from('.hero-cta', { opacity: 0, y: 18, duration: 1, stagger: 0.09 }, 0.92)
           .from('.hero-stat', { opacity: 0, y: 20, duration: 1, stagger: 0.1 }, 1.05)
@@ -33,10 +42,18 @@ export default function Hero() {
 
       // parallax suave do conteudo ao rolar
       gsap.to('.hero-inner', {
-        yPercent: 12,
-        opacity: 0.35,
+        yPercent: 8,
+        opacity: 0.72,
         ease: 'none',
         scrollTrigger: { trigger: root.current, start: 'top top', end: 'bottom top', scrub: 0.6 },
+      })
+
+      // a foto de fundo se move mais devagar que o conteudo (profundidade)
+      gsap.to('.hero-bg', {
+        yPercent: 14,
+        scale: 1.18,
+        ease: 'none',
+        scrollTrigger: { trigger: root.current, start: 'top top', end: 'bottom top', scrub: 0.8 },
       })
     }, root)
 
@@ -45,10 +62,38 @@ export default function Hero() {
 
   return (
     <section ref={root} id="top" className="noise relative min-h-[100svh] overflow-hidden">
-      {/* fundo */}
-      <Aurora className="absolute inset-x-0 top-0 h-[78vh] opacity-70" />
-      <div className="absolute inset-0 bg-[radial-gradient(120%_80%_at_50%_-10%,rgba(212,175,106,0.10),transparent_60%)]" />
-      <div className="absolute inset-x-0 bottom-0 h-56 bg-gradient-to-t from-ink-950 to-transparent" />
+      {/* Foto de fundo: skyline de Sao Paulo em luz de cobre */}
+      <div className="absolute inset-0">
+        <img
+          src="/img/sp-skyline-cobre.jpg"
+          alt=""
+          aria-hidden="true"
+          fetchPriority="high"
+          className="hero-bg h-full w-full scale-110 object-cover object-center opacity-45"
+        />
+        <div className="absolute inset-0 bg-ink-950/45 mix-blend-multiply" />
+      </div>
+
+      {/* Aurora por cima da foto, mascarada por um gradiente — senao a borda
+          organica dela desenha um "blob" escuro no meio do hero. */}
+      <div
+        className="absolute inset-0"
+        style={{
+          maskImage: 'linear-gradient(to bottom, #000 0%, #000 34%, transparent 72%)',
+          WebkitMaskImage: 'linear-gradient(to bottom, #000 0%, #000 34%, transparent 72%)',
+        }}
+      >
+        <Aurora
+          className="absolute inset-0 opacity-40"
+          colorStops={['#8a6a34', '#d4af6a', '#c39a52']}
+          amplitude={0.85}
+          blend={0.75}
+        />
+      </div>
+
+      {/* scrim: escurece a esquerda para o texto ter contraste */}
+      <div className="absolute inset-0 bg-[linear-gradient(100deg,rgba(7,9,15,0.90)_0%,rgba(7,9,15,0.66)_46%,rgba(7,9,15,0.34)_100%)]" />
+      <div className="absolute inset-x-0 bottom-0 h-64 bg-gradient-to-t from-ink-950 to-transparent" />
 
       <div className="hero-inner relative mx-auto flex min-h-[100svh] max-w-[1240px] flex-col justify-center px-6 pt-32 pb-20 lg:px-10">
         <span className="hero-eyebrow inline-flex w-fit items-center gap-2.5 rounded-full border border-gold-400/25 bg-gold-400/[0.06] px-4 py-1.5 text-[11px] uppercase tracking-[0.22em] text-gold-300">
@@ -56,21 +101,26 @@ export default function Hero() {
             <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-gold-400 opacity-60" />
             <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-gold-400" />
           </span>
-          Seis décadas em São Paulo
+          65 anos em São Paulo
         </span>
 
-        <h1 className="mt-9 max-w-[19ch] font-display text-[clamp(2.9rem,8.2vw,7rem)] leading-[0.93] font-light tracking-[-0.03em] text-bone-50">
+        <h1
+          className="mt-7 max-w-[19ch] font-display text-[clamp(2.7rem,7vw,5.8rem)] leading-[1.02] font-light tracking-[-0.03em] text-bone-50"
+          style={{ perspective: '900px' }}
+        >
           <span ref={l1} className="block opacity-0">Administramos</span>
-          <span ref={l2} className="block opacity-0 italic text-gold-300">patrimônios.</span>
+          <span ref={l2} className="block pr-[0.14em] opacity-0 italic text-gold-300">
+            patrimônios.
+          </span>
         </h1>
 
-        <p className="hero-lead mt-8 max-w-[54ch] text-pretty text-[17px] leading-[1.65] text-bone-100/62 lg:text-[18.5px]">
+        <p className="hero-lead mt-7 max-w-[54ch] text-pretty text-[16.5px] leading-[1.65] text-bone-100/78 lg:text-[18px]">
           Condomínios, imóveis e carteiras de locação sob uma gestão personalizada —
-          a mesma que, desde 1965, faz da Mario Dal Maso uma
+          a mesma que, desde 1960, faz da Mario Dal Maso uma
           <em className="not-italic text-bone-50"> boutique imobiliária</em> em Moema.
         </p>
 
-        <div className="mt-11 flex flex-wrap items-center gap-4">
+        <div className="mt-9 flex flex-wrap items-center gap-4">
           <Magnetic className="hero-cta">
             <a
               href="#contato"
@@ -98,9 +148,9 @@ export default function Hero() {
         </div>
 
         {/* metricas rapidas */}
-        <div className="mt-20 grid max-w-3xl grid-cols-2 gap-x-8 gap-y-7 border-t border-white/8 pt-9 sm:grid-cols-4">
+        <div className="mt-14 grid max-w-3xl grid-cols-2 gap-x-8 gap-y-6 border-t border-white/10 pt-8 sm:grid-cols-4">
           {[
-            ['60', 'anos de história'],
+            ['65', 'anos de história'],
             ['12', 'áreas especializadas'],
             ['24h', 'para repasse'],
             ['3', 'certificações do setor'],

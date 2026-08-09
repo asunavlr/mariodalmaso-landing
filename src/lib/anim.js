@@ -32,24 +32,16 @@ export function splitChars(el) {
     word.setAttribute('aria-hidden', 'true')
 
     for (const ch of chunk) {
-      const outer = document.createElement('span')
-      outer.style.display = 'inline-block'
-      outer.style.overflow = 'hidden'
-      outer.style.verticalAlign = 'top'
-      // Folga para acentos (ô, ã) e descendentes (p, g, ç) nao serem cortados
-      // pelo overflow. O espaco extra e devolvido com margens negativas.
-      outer.style.paddingTop = '0.18em'
-      outer.style.marginTop = '-0.18em'
-      outer.style.paddingBottom = '0.22em'
-      outer.style.marginBottom = '-0.22em'
-
-      const inner = document.createElement('span')
-      inner.style.display = 'inline-block'
-      inner.textContent = ch
-
-      outer.appendChild(inner)
-      word.appendChild(outer)
-      chars.push(inner)
+      // Sem overflow:hidden por caractere. Fontes serifadas em italico
+      // (Fraunces) tem glifos que ultrapassam a largura de avanco, e a
+      // mascara por letra cortava as bordas. A entrada e feita so com
+      // opacidade + deslocamento, sem clipping.
+      const span = document.createElement('span')
+      span.style.display = 'inline-block'
+      span.style.willChange = 'transform, opacity'
+      span.textContent = ch
+      word.appendChild(span)
+      chars.push(span)
     }
     el.appendChild(word)
   })

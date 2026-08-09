@@ -22,9 +22,12 @@ export function SplitText({ as: Tag = 'h2', children, className = '', delay = 0,
       gsap.set(ref.current, { opacity: 1 })
       ctx = gsap.context(() => {
         gsap.from(chars, {
-          yPercent: 115,
-          duration: 1.05,
+          opacity: 0,
+          y: '0.5em',
+          rotateX: -55,
+          duration: 1.1,
           ease: 'expo.out',
+          transformOrigin: '50% 100%',
           stagger,
           delay,
           scrollTrigger: { trigger: ref.current, start: 'top 88%', once: true },
@@ -35,7 +38,7 @@ export function SplitText({ as: Tag = 'h2', children, className = '', delay = 0,
   }, [delay, stagger])
 
   return (
-    <Tag ref={ref} className={`opacity-0 ${className}`}>
+    <Tag ref={ref} className={`opacity-0 ${className}`} style={{ perspective: '900px' }}>
       {children}
     </Tag>
   )

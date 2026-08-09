@@ -55,7 +55,7 @@ export default function Empresa() {
               as="h2"
               className="max-w-[16ch] font-display text-[clamp(2.1rem,4.6vw,3.7rem)] leading-[1.04] font-light tracking-[-0.025em] text-bone-50"
             >
-              Seis décadas construindo confiança.
+              Sessenta e cinco anos construindo confiança.
             </SplitText>
 
             <ScrollReveal className="mt-9 max-w-[62ch] text-pretty text-[17px] leading-[1.75] text-bone-100/60">

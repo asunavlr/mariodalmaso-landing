@@ -4,6 +4,22 @@
  * institucionais sao fieis ao original.
  */
 
+/**
+ * Fonte unica da idade da empresa.
+ *
+ * O site atual se contradiz: /historia/ diz "seis décadas", /certificacoes/
+ * diz "55 anos", /servico/gestao_integrada/ diz "há 50 anos" e existe uma
+ * pagina /60-anos/. A pagina /60-anos/ afirma que "o empreendedor Mario Dal
+ * Maso comecou a construir sua historia de sucesso em 1960" — essa e a
+ * fundacao confirmada.
+ *
+ * YEARS segue o material de campanha atual da empresa (65 anos). Para deixar
+ * o numero sempre correto sozinho, troque por:
+ *     export const YEARS = new Date().getFullYear() - FOUNDED
+ */
+export const FOUNDED = 1960
+export const YEARS = 65
+
 export const CONTACT = {
   phone: '11 5095-1333',
   phoneHref: 'tel:+551150951333',
@@ -33,7 +49,7 @@ export const NAV = [
 ]
 
 export const STATS = [
-  { value: 60, suffix: '', label: 'anos de mercado', sub: 'Seis décadas administrando patrimônios em São Paulo' },
+  { value: YEARS, suffix: '', label: 'anos de mercado', sub: `Desde ${FOUNDED}, administrando patrimônios em São Paulo` },
   { value: 60, suffix: '', label: 'colaboradores', sub: 'Distribuídos em 12 áreas especializadas' },
   { value: 24, suffix: 'h', label: 'para repasse', sub: 'Aluguel na conta após confirmação do pagamento' },
   { value: 3, suffix: ' mil', label: 'corretores', sub: 'Alcance via Rede SECOVI e 50+ portais' },

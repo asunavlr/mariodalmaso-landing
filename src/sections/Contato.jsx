@@ -32,7 +32,19 @@ function Field({ label, type = 'text', name, required, options, rows }) {
 
 export default function Contato() {
   return (
-    <section id="contato" className="relative border-t border-white/6 py-28 lg:py-40">
+    <section id="contato" className="relative overflow-hidden border-t border-white/6 py-28 lg:py-40">
+      {/* entrada de prédio à noite, apenas como atmosfera no rodapé da seção */}
+      <div className="pointer-events-none absolute inset-x-0 bottom-0 h-[55%]">
+        <img
+          src="/img/entrada-noite.jpg"
+          alt=""
+          aria-hidden="true"
+          loading="lazy"
+          decoding="async"
+          className="h-full w-full object-cover object-center opacity-[0.16]"
+        />
+        <div className="absolute inset-0 bg-gradient-to-t from-ink-950 via-ink-950/88 to-ink-950" />
+      </div>
       <div className="pointer-events-none absolute left-1/2 top-0 h-[400px] w-[900px] -translate-x-1/2 rounded-full bg-gold-400/[0.05] blur-[130px]" />
 
       <div className="relative mx-auto max-w-[1240px] px-6 lg:px-10">

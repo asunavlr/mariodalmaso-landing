@@ -302,7 +302,7 @@ export function Intro() {
         </div>
         <div className="intro-rule mx-auto mt-5 h-px w-48 origin-left scale-x-0 bg-gradient-to-r from-transparent via-gold-400 to-transparent" />
         <div className="intro-word mt-5 translate-y-6 text-[10.5px] uppercase tracking-[0.3em] text-bone-100/40 opacity-0">
-          desde 1965
+          desde 1960
         </div>
       </div>
     </div>
