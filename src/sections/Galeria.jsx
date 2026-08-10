@@ -45,19 +45,19 @@ function ParallaxImage({ src, alt, className = '', strength = 16, priority = fal
 
 const SHOTS = [
   {
-    src: '/img/torres-vidro.jpg',
+    src: '/img/torres-vidro.webp',
     alt: 'Torres de vidro vistas de baixo contra o céu',
     caption: 'Comerciais',
     text: 'Lajes corporativas e torres de escritório',
   },
   {
-    src: '/img/fachada-residencial.jpg',
+    src: '/img/fachada-residencial.webp',
     alt: 'Fachada de edifício residencial contemporâneo',
     caption: 'Residenciais',
     text: 'Condomínios verticais e horizontais',
   },
   {
-    src: '/img/fachada-geometrica.jpg',
+    src: '/img/fachada-geometrica.webp',
     alt: 'Fachada de concreto com padrão geométrico',
     caption: 'Industriais',
     text: 'Galpões, centros logísticos e plantas',

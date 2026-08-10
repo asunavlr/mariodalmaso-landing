@@ -18,11 +18,9 @@ export default function Servicos() {
       {/* fundo: malha de pontos reativa + brilho que flutua */}
       <DotGrid className="pointer-events-none absolute inset-0 h-full w-full opacity-70" />
       <div className="pointer-events-none absolute inset-x-0 top-0 h-px gold-line opacity-30" />
-      <div className="pointer-events-none absolute left-1/2 top-24 h-[420px] w-[820px] -translate-x-1/2 animate-[mdm-drift_14s_ease-in-out_infinite] rounded-full bg-gold-400/[0.05] blur-[120px]" />
-      <style>{`@keyframes mdm-drift {
-        0%,100% { transform: translate(-50%,0) scale(1); opacity:.55 }
-        50%     { transform: translate(-46%,26px) scale(1.12); opacity:.85 }
-      }`}</style>
+      {/* brilho parado: mover/escalar um elemento com blur de 120px obriga o
+          navegador a refazer o desfoque em todo frame, o tempo todo */}
+      <div className="pointer-events-none absolute left-1/2 top-24 h-[420px] w-[820px] -translate-x-1/2 rounded-full bg-gold-400/[0.06] blur-[120px]" />
 
       <div className="relative mx-auto max-w-[1240px] px-6 lg:px-10">
         <div className="flex flex-col justify-between gap-8 md:flex-row md:items-end">

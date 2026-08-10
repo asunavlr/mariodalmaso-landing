@@ -36,7 +36,7 @@ export default function Contato() {
       {/* entrada de prédio à noite, apenas como atmosfera no rodapé da seção */}
       <div className="pointer-events-none absolute inset-x-0 bottom-0 h-[55%]">
         <img
-          src="/img/entrada-noite.jpg"
+          src="/img/entrada-noite.webp"
           alt=""
           aria-hidden="true"
           loading="lazy"

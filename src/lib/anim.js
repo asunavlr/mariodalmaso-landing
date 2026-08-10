@@ -36,9 +36,10 @@ export function splitChars(el) {
       // (Fraunces) tem glifos que ultrapassam a largura de avanco, e a
       // mascara por letra cortava as bordas. A entrada e feita so com
       // opacidade + deslocamento, sem clipping.
+      // sem will-change aqui: cada titulo vira dezenas de spans, e promover
+      // todos a camada propria custava mais memoria do que economizava frame.
       const span = document.createElement('span')
       span.style.display = 'inline-block'
-      span.style.willChange = 'transform, opacity'
       span.textContent = ch
       word.appendChild(span)
       chars.push(span)

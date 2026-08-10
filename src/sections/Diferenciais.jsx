@@ -57,7 +57,7 @@ export default function Diferenciais() {
       {/* vista aerea no crepusculo, bem apagada, so para dar textura */}
       <div className="pointer-events-none absolute inset-x-0 top-0 h-[70%]">
         <img
-          src="/img/aerea-crepusculo.jpg"
+          src="/img/aerea-crepusculo.webp"
           alt=""
           aria-hidden="true"
           loading="lazy"

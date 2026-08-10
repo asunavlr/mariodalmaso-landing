@@ -42,12 +42,13 @@ export default function Manifesto() {
           scrollTrigger: { trigger: root.current, start: 'top bottom', end: 'bottom top', scrub: 0.7 },
         }
       )
+      // so opacidade: animar blur por palavra, preso ao scroll, obrigava o
+      // navegador a redesenhar cada palavra em todo frame.
       gsap.fromTo(
         el.querySelectorAll('.mfw'),
-        { opacity: 0.14, filter: 'blur(4px)' },
+        { opacity: 0.14 },
         {
           opacity: 1,
-          filter: 'blur(0px)',
           ease: 'none',
           stagger: 0.06,
           scrollTrigger: { trigger: root.current, start: 'top 66%', end: 'center 44%', scrub: 0.8 },
@@ -62,7 +63,7 @@ export default function Manifesto() {
       <div className="absolute inset-0">
         <img
           ref={img}
-          src="/img/lobby-escuro.jpg"
+          src="/img/lobby-escuro.webp"
           alt=""
           aria-hidden="true"
           loading="lazy"

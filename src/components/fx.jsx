@@ -133,13 +133,21 @@ export function ScrollVelocity({ text, className = '', baseSpeed = 0.6 }) {
 
   useEffect(() => {
     const el = track.current
-    if (!el) return
+    const box = wrap.current
+    if (!el || !box) return
     if (prefersReduced()) return
 
     let x = 0
     let vel = 0
     let last = window.scrollY
     let raf = 0
+    let visible = false
+
+    // largura medida uma vez (e no resize) — ler scrollWidth a cada frame
+    // forcava reflow do documento inteiro, 60x por segundo.
+    let half = el.scrollWidth / 2 || 1
+    const measure = () => { half = el.scrollWidth / 2 || 1 }
+    window.addEventListener('resize', measure)
 
     const onScroll = () => {
       const now = window.scrollY
@@ -148,22 +156,32 @@ export function ScrollVelocity({ text, className = '', baseSpeed = 0.6 }) {
     }
     window.addEventListener('scroll', onScroll, { passive: true })
 
-    const half = () => el.scrollWidth / 2 || 1
-
     const tick = () => {
       raf = requestAnimationFrame(tick)
+      if (!visible) return
       vel *= 0.92
       x -= baseSpeed + vel * 0.16
-      const h = half()
-      if (x <= -h) x += h
-      if (x > 0) x -= h
+      if (x <= -half) x += half
+      if (x > 0) x -= half
       el.style.transform = `translate3d(${x}px,0,0)`
     }
-    raf = requestAnimationFrame(tick)
+
+    // so anima enquanto a faixa esta na tela
+    const io = new IntersectionObserver(
+      ([e]) => {
+        visible = e.isIntersecting
+        if (visible && !raf) raf = requestAnimationFrame(tick)
+        else if (!visible && raf) { cancelAnimationFrame(raf); raf = 0 }
+      },
+      { rootMargin: '120px 0px' }
+    )
+    io.observe(box)
 
     return () => {
-      cancelAnimationFrame(raf)
+      if (raf) cancelAnimationFrame(raf)
+      io.disconnect()
       window.removeEventListener('scroll', onScroll)
+      window.removeEventListener('resize', measure)
     }
   }, [baseSpeed])
 
@@ -188,81 +206,133 @@ export function ScrollVelocity({ text, className = '', baseSpeed = 0.6 }) {
 /* ------------------------------------------------------------------ */
 /* DotGrid — malha de pontos que reage ao cursor (canvas 2D, leve)     */
 /* ------------------------------------------------------------------ */
-export function DotGrid({ className = '', gap = 30, radius = 130 }) {
+export function DotGrid({ className = '', gap = 34, radius = 130 }) {
   const ref = useRef(null)
 
   useEffect(() => {
     const cv = ref.current
     if (!cv) return
-    const ctx = cv.getContext('2d')
+    const ctx = cv.getContext('2d', { alpha: true })
     const reduced = prefersReduced()
+    const touch = window.matchMedia('(hover: none)').matches
+
     let dots = []
     let raf = 0
-    const mouse = { x: -9999, y: -9999 }
-    let dpr = Math.min(window.devicePixelRatio || 1, 2)
+    let visible = false
+    let w = 0
+    let h = 0
+    const mouse = { x: -9999, y: -9999, inside: false }
 
     const build = () => {
+      const dpr = Math.min(window.devicePixelRatio || 1, 2)
       const r = cv.getBoundingClientRect()
-      cv.width = r.width * dpr
-      cv.height = r.height * dpr
-      ctx.scale(dpr, dpr)
+      w = r.width
+      h = r.height
+      cv.width = Math.round(w * dpr)
+      cv.height = Math.round(h * dpr)
+      // setTransform (nao scale) — scale acumulava a cada resize
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0)
       dots = []
-      for (let y = gap; y < r.height; y += gap)
-        for (let x = gap; x < r.width; x += gap) dots.push({ x, y, ox: x, oy: y })
+      for (let y = gap; y < h; y += gap)
+        for (let x = gap; x < w; x += gap) dots.push({ x, y, ox: x, oy: y })
     }
 
-    const draw = () => {
-      const r = cv.getBoundingClientRect()
-      ctx.clearRect(0, 0, r.width, r.height)
+    const paintStatic = () => {
+      ctx.clearRect(0, 0, w, h)
+      ctx.fillStyle = 'rgba(212,175,106,0.16)'
       for (const d of dots) {
-        const dx = d.x - mouse.x
-        const dy = d.y - mouse.y
-        const dist = Math.hypot(dx, dy)
+        ctx.beginPath()
+        ctx.arc(d.ox, d.oy, 1, 0, Math.PI * 2)
+        ctx.fill()
+      }
+    }
+
+    // desenha so enquanto algo esta se mexendo; parado, o loop nao toca no canvas
+    const draw = () => {
+      raf = requestAnimationFrame(draw)
+      if (!visible) return
+
+      let moving = false
+      ctx.clearRect(0, 0, w, h)
+      for (const d of dots) {
         let tx = d.ox
         let ty = d.oy
         let alpha = 0.16
         let size = 1
-        if (dist < radius) {
-          const f = (1 - dist / radius)
-          tx = d.ox + (dx / (dist || 1)) * f * 22
-          ty = d.oy + (dy / (dist || 1)) * f * 22
-          alpha = 0.16 + f * 0.65
-          size = 1 + f * 1.4
+        if (mouse.inside) {
+          const dx = d.x - mouse.x
+          const dy = d.y - mouse.y
+          const d2 = dx * dx + dy * dy
+          if (d2 < radius * radius) {
+            const dist = Math.sqrt(d2) || 1
+            const f = 1 - dist / radius
+            tx = d.ox + (dx / dist) * f * 22
+            ty = d.oy + (dy / dist) * f * 22
+            alpha = 0.16 + f * 0.65
+            size = 1 + f * 1.4
+          }
         }
-        d.x += (tx - d.x) * 0.12
-        d.y += (ty - d.y) * 0.12
+        const ex = tx - d.x
+        const ey = ty - d.y
+        if (ex * ex + ey * ey > 0.01) moving = true
+        d.x += ex * 0.12
+        d.y += ey * 0.12
         ctx.beginPath()
         ctx.arc(d.x, d.y, size, 0, Math.PI * 2)
         ctx.fillStyle = `rgba(212,175,106,${alpha})`
         ctx.fill()
       }
-      raf = requestAnimationFrame(draw)
+
+      if (!moving && !mouse.inside) {
+        // tudo em repouso: encerra o loop ate o mouse voltar
+        cancelAnimationFrame(raf)
+        raf = 0
+        paintStatic()
+      }
     }
+
+    const wake = () => { if (!raf && visible) raf = requestAnimationFrame(draw) }
 
     const onMove = (e) => {
       const r = cv.getBoundingClientRect()
-      mouse.x = e.clientX - r.left
-      mouse.y = e.clientY - r.top
+      const x = e.clientX - r.left
+      const y = e.clientY - r.top
+      const near = x > -radius && y > -radius && x < r.width + radius && y < r.height + radius
+      mouse.x = x
+      mouse.y = y
+      mouse.inside = near
+      if (near) wake()
     }
-    const onLeave = () => { mouse.x = -9999; mouse.y = -9999 }
-    const onResize = () => { dpr = Math.min(window.devicePixelRatio || 1, 2); build() }
+    const onLeave = () => { mouse.inside = false; wake() }
+
+    let resizeT = 0
+    const onResize = () => {
+      clearTimeout(resizeT)
+      resizeT = setTimeout(() => { build(); paintStatic(); wake() }, 150)
+    }
 
     build()
-    if (reduced) {
-      // desenha estatico
-      for (const d of dots) {
-        ctx.beginPath(); ctx.arc(d.x, d.y, 1, 0, Math.PI * 2)
-        ctx.fillStyle = 'rgba(212,175,106,0.16)'; ctx.fill()
-      }
-    } else {
-      raf = requestAnimationFrame(draw)
-      window.addEventListener('mousemove', onMove)
-      cv.addEventListener('mouseleave', onLeave)
-    }
+    paintStatic()
     window.addEventListener('resize', onResize)
 
+    let io
+    if (!reduced && !touch) {
+      window.addEventListener('mousemove', onMove, { passive: true })
+      cv.addEventListener('mouseleave', onLeave)
+      io = new IntersectionObserver(
+        ([e]) => {
+          visible = e.isIntersecting
+          if (!visible && raf) { cancelAnimationFrame(raf); raf = 0 }
+        },
+        { rootMargin: '100px 0px' }
+      )
+      io.observe(cv)
+    }
+
     return () => {
-      cancelAnimationFrame(raf)
+      clearTimeout(resizeT)
+      if (raf) cancelAnimationFrame(raf)
+      io?.disconnect()
       window.removeEventListener('mousemove', onMove)
       window.removeEventListener('resize', onResize)
       cv.removeEventListener('mouseleave', onLeave)

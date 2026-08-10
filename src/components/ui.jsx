@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, Children } from 'react'
+import { useEffect, useRef, Children } from 'react'
 import { gsap, ScrollTrigger, EASE, splitChars, whenFontsReady, prefersReduced } from '../lib/anim'
 
 /* ------------------------------------------------------------------ */
@@ -53,7 +53,9 @@ export function Reveal({
   y = 26,
   delay = 0,
   duration = 1,
-  blur = true,
+  // blur desligado por padrao: desfocar blocos grandes na entrada custa um
+  // redesenho caro justamente quando a secao esta aparecendo.
+  blur = false,
   as: Tag = 'div',
 }) {
   const ref = useRef(null)
@@ -68,11 +70,11 @@ export function Reveal({
     const ctx = gsap.context(() => {
       gsap.fromTo(
         el,
-        { opacity: 0, y, filter: blur ? 'blur(10px)' : 'none' },
+        { opacity: 0, y, ...(blur ? { filter: 'blur(10px)' } : null) },
         {
           opacity: 1,
           y: 0,
-          filter: 'blur(0px)',
+          ...(blur ? { filter: 'blur(0px)' } : null),
           duration,
           delay,
           ease: EASE,
@@ -167,25 +169,51 @@ export function CountUp({ to, from = 0, duration = 2, suffix = '', prefix = '', 
 /* ------------------------------------------------------------------ */
 export function SpotlightCard({ children, className = '', spotlight = 'rgba(212,175,106,0.16)' }) {
   const ref = useRef(null)
-  const [pos, setPos] = useState({ x: 0, y: 0 })
-  const [op, setOp] = useState(0)
+  const glow = useRef(null)
+  const rect = useRef(null)
+  const frame = useRef(0)
+
+  // Sem estado do React aqui: cada movimento do mouse re-renderizava o card
+  // inteiro. Agora so escreve duas variaveis CSS, uma vez por frame.
+  const onMove = (e) => {
+    rect.current = { x: e.clientX, y: e.clientY }
+    if (frame.current) return
+    frame.current = requestAnimationFrame(() => {
+      frame.current = 0
+      const g = glow.current
+      const el = ref.current
+      const p = rect.current
+      if (!g || !el || !p) return
+      const r = el.getBoundingClientRect()
+      g.style.setProperty('--mx', `${p.x - r.left}px`)
+      g.style.setProperty('--my', `${p.y - r.top}px`)
+    })
+  }
+
+  const onEnter = () => {
+    if (glow.current) glow.current.style.opacity = '1'
+  }
+  const onLeave = () => {
+    rect.current = null
+    if (frame.current) { cancelAnimationFrame(frame.current); frame.current = 0 }
+    if (glow.current) glow.current.style.opacity = '0'
+  }
+
+  useEffect(() => () => { if (frame.current) cancelAnimationFrame(frame.current) }, [])
 
   return (
     <div
       ref={ref}
-      onMouseMove={(e) => {
-        const r = ref.current.getBoundingClientRect()
-        setPos({ x: e.clientX - r.left, y: e.clientY - r.top })
-      }}
-      onMouseEnter={() => setOp(1)}
-      onMouseLeave={() => setOp(0)}
+      onMouseMove={onMove}
+      onMouseEnter={onEnter}
+      onMouseLeave={onLeave}
       className={`group relative overflow-hidden rounded-2xl border border-white/8 bg-ink-900/60 transition-colors duration-500 hover:border-gold-400/35 ${className}`}
     >
       <div
-        className="pointer-events-none absolute inset-0 transition-opacity duration-500"
+        ref={glow}
+        className="pointer-events-none absolute inset-0 opacity-0 transition-opacity duration-500"
         style={{
-          opacity: op,
-          background: `radial-gradient(520px circle at ${pos.x}px ${pos.y}px, ${spotlight}, transparent 62%)`,
+          background: `radial-gradient(520px circle at var(--mx, 50%) var(--my, 50%), ${spotlight}, transparent 62%)`,
         }}
       />
       {children}

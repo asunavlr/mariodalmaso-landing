@@ -100,11 +100,13 @@ export default function Aurora({
 
     const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches
 
+    // dpr 1.5 e sem antialias: e um gradiente difuso atras da foto, ninguem
+    // percebe a diferenca — mas o custo de GPU cai quase pela metade.
     const renderer = new Renderer({
       alpha: true,
       premultipliedAlpha: true,
-      antialias: true,
-      dpr: Math.min(window.devicePixelRatio, 2),
+      antialias: false,
+      dpr: Math.min(window.devicePixelRatio || 1, 1.5),
     })
     const gl = renderer.gl
     gl.clearColor(0, 0, 0, 0)
@@ -155,7 +157,7 @@ export default function Aurora({
       program.uniforms.uTime.value = (t * 0.001) * p.speed
       program.uniforms.uAmplitude.value = p.amplitude
       program.uniforms.uBlend.value = p.blend
-      program.uniforms.uColorStops.value = p.colorStops.map((c) => new Color(c))
+      // as cores nao mudam: recriar tres objetos Color por frame so gerava lixo
       renderer.render({ scene: mesh })
     }
 

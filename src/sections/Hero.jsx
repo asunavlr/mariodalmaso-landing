@@ -65,13 +65,15 @@ export default function Hero() {
       {/* Foto de fundo: skyline de Sao Paulo em luz de cobre */}
       <div className="absolute inset-0">
         <img
-          src="/img/sp-skyline-cobre.jpg"
+          src="/img/sp-skyline-cobre.webp"
           alt=""
           aria-hidden="true"
           fetchPriority="high"
           className="hero-bg h-full w-full scale-110 object-cover object-center opacity-45"
         />
-        <div className="absolute inset-0 bg-ink-950/45 mix-blend-multiply" />
+        {/* sem mix-blend: o modo de mesclagem forcava o navegador a recompor a
+            tela inteira a cada frame do parallax */}
+        <div className="absolute inset-0 bg-ink-950/50" />
       </div>
 
       {/* Aurora por cima da foto, mascarada por um gradiente — senao a borda
