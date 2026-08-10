@@ -39,7 +39,7 @@ export default function Manifesto() {
           yPercent: 12,
           scale: 1.14,
           ease: 'none',
-          scrollTrigger: { trigger: root.current, start: 'top bottom', end: 'bottom top', scrub: 0.7 },
+          scrollTrigger: { trigger: root.current, start: 'top bottom', end: 'bottom top', scrub: 0.3 },
         }
       )
       // so opacidade: animar blur por palavra, preso ao scroll, obrigava o
@@ -51,7 +51,7 @@ export default function Manifesto() {
           opacity: 1,
           ease: 'none',
           stagger: 0.06,
-          scrollTrigger: { trigger: root.current, start: 'top 66%', end: 'center 44%', scrub: 0.8 },
+          scrollTrigger: { trigger: root.current, start: 'top 66%', end: 'center 44%', scrub: 0.3 },
         }
       )
     }, root)

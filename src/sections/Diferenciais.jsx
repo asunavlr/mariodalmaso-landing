@@ -45,7 +45,7 @@ export default function Diferenciais() {
           scaleY: 1,
           transformOrigin: 'top',
           ease: 'none',
-          scrollTrigger: { trigger: '.dif-list', start: 'top 72%', end: 'bottom 78%', scrub: 0.7 },
+          scrollTrigger: { trigger: '.dif-list', start: 'top 72%', end: 'bottom 78%', scrub: 0.3 },
         }
       )
     }, root)

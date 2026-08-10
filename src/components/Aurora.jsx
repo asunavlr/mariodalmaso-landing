@@ -75,6 +75,11 @@ void main() {
   float midPoint = 0.20;
   float alpha = smoothstep(midPoint - uBlend * 0.5, midPoint + uBlend * 0.5, intensity);
 
+  // desvanecimento vertical feito aqui dentro. Antes era uma mascara CSS por
+  // cima do canvas, e mascarar em CSS obriga uma composicao extra da tela
+  // inteira a cada quadro desenhado.
+  alpha *= smoothstep(0.28, 0.66, uv.y);
+
   fragColor = vec4(rampCol * alpha, alpha);
 }
 `
@@ -100,13 +105,14 @@ export default function Aurora({
 
     const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches
 
-    // dpr 1.5 e sem antialias: e um gradiente difuso atras da foto, ninguem
-    // percebe a diferenca — mas o custo de GPU cai quase pela metade.
+    // dpr 1 e sem antialias: e um gradiente difuso, mascarado e a 40% de
+    // opacidade atras da foto. Medido: a aurora era 25% do JS durante o
+    // scroll do hero, entao aqui vale cada corte.
     const renderer = new Renderer({
       alpha: true,
       premultipliedAlpha: true,
       antialias: false,
-      dpr: Math.min(window.devicePixelRatio || 1, 1.5),
+      dpr: 0.5, // metade da resolucao, esticada pelo CSS: e um borrao, nao tem detalhe a perder
     })
     const gl = renderer.gl
     gl.clearColor(0, 0, 0, 0)
@@ -150,9 +156,14 @@ export default function Aurora({
     io.observe(host)
 
     let raf = 0
+    let lastDraw = 0
     const loop = (t) => {
       raf = requestAnimationFrame(loop)
       if (!visible) return
+      // 30fps: e uma onda lenta, o olho nao distingue de 60 — e libera
+      // metade dos frames para o resto do hero
+      if (t - lastDraw < 33) return
+      lastDraw = t
       const p = propsRef.current
       program.uniforms.uTime.value = (t * 0.001) * p.speed
       program.uniforms.uAmplitude.value = p.amplitude

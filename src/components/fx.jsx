@@ -22,32 +22,32 @@ export function Cursor() {
     const ry = gsap.quickTo(r, 'y', { duration: 0.5, ease: 'power3' })
 
     let shown = false
+    let onLink = false
+
+    // O estado de "sobre um link" sai do proprio mousemove. Antes eram dois
+    // ouvintes de entrada/saida no documento inteiro: com a pagina rolando sob
+    // o mouse parado, eles disparavam sem parar, e cada disparo obriga o
+    // navegador a recalcular estilo para saber o que esta sob o ponteiro.
     const move = (e) => {
       if (!shown) { gsap.to([d, r], { opacity: 1, duration: 0.3 }); shown = true }
       dx(e.clientX); dy(e.clientY); rx(e.clientX); ry(e.clientY)
-    }
-    const over = (e) => {
-      if (e.target.closest('a, button, input, select, textarea, [data-cursor]')) {
-        gsap.to(r, { scale: 2.2, borderColor: 'rgba(212,175,106,0.9)', duration: 0.35 })
-        gsap.to(d, { scale: 0, duration: 0.25 })
-      }
-    }
-    const out = (e) => {
-      if (e.target.closest('a, button, input, select, textarea, [data-cursor]')) {
-        gsap.to(r, { scale: 1, borderColor: 'rgba(255,255,255,0.28)', duration: 0.35 })
-        gsap.to(d, { scale: 1, duration: 0.25 })
-      }
+
+      const now = !!e.target.closest?.('a, button, input, select, textarea, [data-cursor]')
+      if (now === onLink) return
+      onLink = now
+      gsap.to(r, {
+        scale: now ? 2.2 : 1,
+        borderColor: now ? 'rgba(212,175,106,0.9)' : 'rgba(255,255,255,0.28)',
+        duration: 0.35,
+      })
+      gsap.to(d, { scale: now ? 0 : 1, duration: 0.25 })
     }
     const leave = () => { gsap.to([d, r], { opacity: 0, duration: 0.25 }); shown = false }
 
-    window.addEventListener('mousemove', move)
-    document.addEventListener('mouseover', over)
-    document.addEventListener('mouseout', out)
+    window.addEventListener('mousemove', move, { passive: true })
     document.addEventListener('mouseleave', leave)
     return () => {
       window.removeEventListener('mousemove', move)
-      document.removeEventListener('mouseover', over)
-      document.removeEventListener('mouseout', out)
       document.removeEventListener('mouseleave', leave)
     }
   }, [])
@@ -75,7 +75,7 @@ export function Parallax({ children, speed = 0.18, className = '' }) {
         {
           yPercent: speed * 100,
           ease: 'none',
-          scrollTrigger: { trigger: el, start: 'top bottom', end: 'bottom top', scrub: 0.8 },
+          scrollTrigger: { trigger: el, start: 'top bottom', end: 'bottom top', scrub: 0.3 },
         }
       )
     }, ref)
@@ -294,6 +294,9 @@ export function DotGrid({ className = '', gap = 34, radius = 130 }) {
     const wake = () => { if (!raf && visible) raf = requestAnimationFrame(draw) }
 
     const onMove = (e) => {
+      // sem isso, todo movimento do mouse na pagina inteira forcava uma
+      // medicao de layout aqui — inclusive com a secao longe da tela
+      if (!visible) return
       const r = cv.getBoundingClientRect()
       const x = e.clientX - r.left
       const y = e.clientY - r.top

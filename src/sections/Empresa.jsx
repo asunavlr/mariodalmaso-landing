@@ -33,7 +33,7 @@ function ScrollReveal({ children, className = '' }) {
           filter: 'blur(0px)',
           ease: 'none',
           stagger: 0.05,
-          scrollTrigger: { trigger: el, start: 'top 78%', end: 'bottom 58%', scrub: 0.8 },
+          scrollTrigger: { trigger: el, start: 'top 78%', end: 'bottom 58%', scrub: 0.3 },
         }
       )
     }, ref)

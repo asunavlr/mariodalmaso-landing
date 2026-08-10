@@ -19,7 +19,7 @@ function ParallaxImage({ src, alt, className = '', strength = 16, priority = fal
         {
           yPercent: strength,
           ease: 'none',
-          scrollTrigger: { trigger: box.current, start: 'top bottom', end: 'bottom top', scrub: 0.7 },
+          scrollTrigger: { trigger: box.current, start: 'top bottom', end: 'bottom top', scrub: 0.3 },
         }
       )
     }, box)

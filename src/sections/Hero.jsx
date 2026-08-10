@@ -45,15 +45,16 @@ export default function Hero() {
         yPercent: 8,
         opacity: 0.72,
         ease: 'none',
-        scrollTrigger: { trigger: root.current, start: 'top top', end: 'bottom top', scrub: 0.6 },
+        scrollTrigger: { trigger: root.current, start: 'top top', end: 'bottom top', scrub: 0.25 },
       })
 
-      // a foto de fundo se move mais devagar que o conteudo (profundidade)
+      // A foto se move mais devagar que o conteudo (profundidade).
+      // So deslocamento: animar a escala junto obrigava o navegador a
+      // redesenhar a foto inteira em todo frame. A escala agora e fixa no CSS.
       gsap.to('.hero-bg', {
         yPercent: 14,
-        scale: 1.18,
         ease: 'none',
-        scrollTrigger: { trigger: root.current, start: 'top top', end: 'bottom top', scrub: 0.8 },
+        scrollTrigger: { trigger: root.current, start: 'top top', end: 'bottom top', scrub: 0.3 },
       })
     }, root)
 
@@ -69,29 +70,21 @@ export default function Hero() {
           alt=""
           aria-hidden="true"
           fetchPriority="high"
-          className="hero-bg h-full w-full scale-110 object-cover object-center opacity-45"
+          className="hero-bg h-full w-full scale-[1.18] object-cover object-center opacity-45 will-change-transform"
         />
         {/* sem mix-blend: o modo de mesclagem forcava o navegador a recompor a
             tela inteira a cada frame do parallax */}
         <div className="absolute inset-0 bg-ink-950/50" />
       </div>
 
-      {/* Aurora por cima da foto, mascarada por um gradiente — senao a borda
-          organica dela desenha um "blob" escuro no meio do hero. */}
-      <div
-        className="absolute inset-0"
-        style={{
-          maskImage: 'linear-gradient(to bottom, #000 0%, #000 34%, transparent 72%)',
-          WebkitMaskImage: 'linear-gradient(to bottom, #000 0%, #000 34%, transparent 72%)',
-        }}
-      >
-        <Aurora
-          className="absolute inset-0 opacity-40"
-          colorStops={['#8a6a34', '#d4af6a', '#c39a52']}
-          amplitude={0.85}
-          blend={0.75}
-        />
-      </div>
+      {/* Aurora por cima da foto. O desvanecimento vertical que antes era
+          mascara CSS agora vem do proprio shader. */}
+      <Aurora
+        className="absolute inset-0 opacity-40"
+        colorStops={['#8a6a34', '#d4af6a', '#c39a52']}
+        amplitude={0.85}
+        blend={0.75}
+      />
 
       {/* scrim: escurece a esquerda para o texto ter contraste */}
       <div className="absolute inset-0 bg-[linear-gradient(100deg,rgba(7,9,15,0.90)_0%,rgba(7,9,15,0.66)_46%,rgba(7,9,15,0.34)_100%)]" />

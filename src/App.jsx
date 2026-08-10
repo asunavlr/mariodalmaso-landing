@@ -113,7 +113,10 @@ export default function App() {
   useEffect(() => {
     if (prefersReduced()) return
 
-    const lenis = new Lenis({ duration: 1.05, smoothWheel: true, touchMultiplier: 1.6 })
+    // Medido: com duration 1.05 a pagina continuava andando ~700ms depois do
+    // ultimo giro da roda. E isso que se sente como "pesado" — nao ha quadro
+    // perdido. Com lerp a rolagem acompanha a roda de perto e ainda suaviza.
+    const lenis = new Lenis({ lerp: 0.25, smoothWheel: true, touchMultiplier: 1.4 })
     lenis.on('scroll', ScrollTrigger.update)
 
     const raf = (time) => lenis.raf(time * 1000)
