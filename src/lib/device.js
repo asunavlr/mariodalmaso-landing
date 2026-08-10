@@ -42,34 +42,66 @@ function weakByHardware() {
 }
 
 /**
- * Conta quadros por ~2,5s. Se mais da metade demorou acima de 22ms (menos de
- * ~45 quadros por segundo), a maquina nao esta dando conta.
+ * Vigia os quadros enquanto a pagina rola. A medicao so acontece durante a
+ * rolagem, que e quando o engasgo aparece, e continua valendo a sessao toda —
+ * nao so nos primeiros segundos.
+ *
+ * Regra: quadro acima de 24ms conta como engasgo. Se em 60 quadros medidos
+ * mais de 40% engasgarem, liga o modo leve.
  */
-function probeFrames() {
+function watchFrames() {
   let slow = 0
   let total = 0
   let last = 0
-  let start = 0
+  let raf = 0
+  let idleTimer = 0
 
   const tick = (t) => {
-    if (!start) { start = t; last = t; requestAnimationFrame(tick); return }
-    const dt = t - last
-    last = t
-    total++
-    if (dt > 22) slow++
-    if (t - start < 2500) {
-      requestAnimationFrame(tick)
-      return
+    if (lite) return
+    if (last) {
+      const dt = t - last
+      total++
+      if (dt > 24) slow++
+      if (total >= 60) {
+        if (slow / total > 0.4) { enable(); return }
+        slow = 0
+        total = 0
+      }
     }
-    if (total > 20 && slow / total > 0.5) enable()
+    last = t
+    raf = requestAnimationFrame(tick)
   }
 
-  requestAnimationFrame(tick)
+  const onScroll = () => {
+    if (lite) return
+    if (!raf) { last = 0; raf = requestAnimationFrame(tick) }
+    clearTimeout(idleTimer)
+    // parou de rolar: encerra a medicao ate a proxima
+    idleTimer = setTimeout(() => {
+      cancelAnimationFrame(raf)
+      raf = 0
+      slow = 0
+      total = 0
+    }, 400)
+  }
+
+  window.addEventListener('scroll', onScroll, { passive: true })
 }
 
 if (typeof window !== 'undefined') {
-  if (weakByHardware()) enable()
-  else window.addEventListener('load', () => setTimeout(probeFrames, 600), { once: true })
+  const forced = new URLSearchParams(window.location.search).get('lite')
+
+  // ?lite=1 liga na marra e fica gravado no navegador; ?lite=0 desfaz.
+  // Serve para testar numa maquina especifica sem depender da deteccao.
+  let saved = null
+  try {
+    if (forced === '1') localStorage.setItem('mdm-lite', '1')
+    if (forced === '0') localStorage.removeItem('mdm-lite')
+    saved = localStorage.getItem('mdm-lite')
+  } catch { /* navegador sem armazenamento: segue so pela deteccao */ }
+
+  if (forced === '1' || saved === '1' || weakByHardware()) enable()
+  else watchFrames()
 }
 
 export const isLite = () => lite
