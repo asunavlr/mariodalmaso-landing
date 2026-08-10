@@ -20,11 +20,14 @@
       content="Administração de condomínios e imóveis em São Paulo. Transparência, tecnologia e 65 anos de confiança."
     />
 
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <!-- A foto do hero comeca a baixar junto com o HTML. Antes o pedido so
+         saia depois que o JS montava a tela. -->
     <link
-      href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,400;9..144,500;9..144,600&family=Instrument+Sans:wght@400;500;600&display=swap"
-      rel="stylesheet"
+      rel="preload"
+      as="image"
+      href="/img/sp-skyline-cobre.webp"
+      type="image/webp"
+      fetchpriority="high"
     />
   </head>
   <body>

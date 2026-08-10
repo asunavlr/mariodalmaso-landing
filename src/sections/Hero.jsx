@@ -1,13 +1,26 @@
-import { useEffect, useRef } from 'react'
-import Aurora from '../components/Aurora'
+import { lazy, Suspense, useEffect, useRef, useState } from 'react'
 import { Magnetic } from '../components/ui'
 import { gsap, splitChars, whenFontsReady, prefersReduced } from '../lib/anim'
 import { CONTACT } from '../data/content'
+
+// A aurora carrega o ogl (WebGL) junto. Fora do pacote principal, ela nao
+// atrasa mais o primeiro desenho do hero — entra depois, quando a tela ja
+// esta de pe.
+const Aurora = lazy(() => import('../components/Aurora'))
 
 export default function Hero() {
   const root = useRef(null)
   const l1 = useRef(null)
   const l2 = useRef(null)
+  const [auroraOn, setAuroraOn] = useState(false)
+
+  // so monta a aurora quando o navegador estiver ocioso
+  useEffect(() => {
+    const idle = window.requestIdleCallback ?? ((fn) => setTimeout(fn, 400))
+    const cancel = window.cancelIdleCallback ?? clearTimeout
+    const id = idle(() => setAuroraOn(true), { timeout: 2000 })
+    return () => cancel(id)
+  }, [])
 
   useEffect(() => {
     const ctx = gsap.context(() => {
@@ -79,12 +92,16 @@ export default function Hero() {
 
       {/* Aurora por cima da foto. O desvanecimento vertical que antes era
           mascara CSS agora vem do proprio shader. */}
-      <Aurora
-        className="absolute inset-0 opacity-40"
-        colorStops={['#8a6a34', '#d4af6a', '#c39a52']}
-        amplitude={0.85}
-        blend={0.75}
-      />
+      {auroraOn && (
+        <Suspense fallback={null}>
+          <Aurora
+            className="absolute inset-0 opacity-40"
+            colorStops={['#8a6a34', '#d4af6a', '#c39a52']}
+            amplitude={0.85}
+            blend={0.75}
+          />
+        </Suspense>
+      )}
 
       {/* scrim: escurece a esquerda para o texto ter contraste */}
       <div className="absolute inset-0 bg-[linear-gradient(100deg,rgba(7,9,15,0.90)_0%,rgba(7,9,15,0.66)_46%,rgba(7,9,15,0.34)_100%)]" />
