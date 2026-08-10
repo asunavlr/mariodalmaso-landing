@@ -1,6 +1,7 @@
 import { useEffect, useRef } from 'react'
 import { Eyebrow, Reveal, SplitText } from '../components/ui'
 import { gsap, prefersReduced } from '../lib/anim'
+import { useLite } from '../lib/device'
 
 /**
  * Imagem com parallax interno: o <img> e maior que o container e desliza
@@ -9,9 +10,10 @@ import { gsap, prefersReduced } from '../lib/anim'
 function ParallaxImage({ src, alt, className = '', strength = 16, priority = false }) {
   const box = useRef(null)
   const img = useRef(null)
+  const lite = useLite()
 
   useEffect(() => {
-    if (prefersReduced()) return
+    if (prefersReduced() || lite) return
     const ctx = gsap.context(() => {
       gsap.fromTo(
         img.current,
@@ -24,7 +26,7 @@ function ParallaxImage({ src, alt, className = '', strength = 16, priority = fal
       )
     }, box)
     return () => ctx.revert()
-  }, [strength])
+  }, [strength, lite])
 
   return (
     <div ref={box} className={`relative overflow-hidden rounded-2xl bg-ink-900 ${className}`}>

@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { gsap, ScrollTrigger, prefersReduced } from '../lib/anim'
+import { isLite, useLite } from '../lib/device'
 
 /* ------------------------------------------------------------------ */
 /* Cursor customizado — anel que segue o mouse e cresce em links        */
@@ -7,9 +8,11 @@ import { gsap, ScrollTrigger, prefersReduced } from '../lib/anim'
 export function Cursor() {
   const dot = useRef(null)
   const ring = useRef(null)
+  const lite = useLite()
 
   useEffect(() => {
     if (prefersReduced()) return
+    if (lite) return // maquina fraca: cursor do sistema, sem custo por movimento
     if (window.matchMedia('(hover: none)').matches) return // sem cursor no touch
 
     const d = dot.current
@@ -50,7 +53,9 @@ export function Cursor() {
       window.removeEventListener('mousemove', move)
       document.removeEventListener('mouseleave', leave)
     }
-  }, [])
+  }, [lite])
+
+  if (lite) return null
 
   return (
     <div className="pointer-events-none fixed inset-0 z-[100] hidden lg:block" aria-hidden="true">
@@ -65,9 +70,10 @@ export function Cursor() {
 /* ------------------------------------------------------------------ */
 export function Parallax({ children, speed = 0.18, className = '' }) {
   const ref = useRef(null)
+  const lite = useLite()
   useEffect(() => {
     const el = ref.current
-    if (!el || prefersReduced()) return
+    if (!el || prefersReduced() || lite) return
     const ctx = gsap.context(() => {
       gsap.fromTo(
         el,
@@ -80,7 +86,7 @@ export function Parallax({ children, speed = 0.18, className = '' }) {
       )
     }, ref)
     return () => ctx.revert()
-  }, [speed])
+  }, [speed, lite])
   return <div ref={ref} className={className}>{children}</div>
 }
 
@@ -89,10 +95,11 @@ export function Parallax({ children, speed = 0.18, className = '' }) {
 /* ------------------------------------------------------------------ */
 export function Tilt3D({ children, className = '', max = 7 }) {
   const ref = useRef(null)
+  const lite = useLite()
 
   useEffect(() => {
     const el = ref.current
-    if (!el || prefersReduced()) return
+    if (!el || prefersReduced() || lite) return
     if (window.matchMedia('(hover: none)').matches) return
 
     const rx = gsap.quickTo(el, 'rotationX', { duration: 0.6, ease: 'power3' })
@@ -113,7 +120,7 @@ export function Tilt3D({ children, className = '', max = 7 }) {
       el.removeEventListener('mousemove', move)
       el.removeEventListener('mouseleave', leave)
     }
-  }, [max])
+  }, [max, lite])
 
   return (
     <div style={{ perspective: '1000px' }} className={className}>
@@ -130,12 +137,14 @@ export function Tilt3D({ children, className = '', max = 7 }) {
 export function ScrollVelocity({ text, className = '', baseSpeed = 0.6 }) {
   const wrap = useRef(null)
   const track = useRef(null)
+  const lite = useLite()
 
   useEffect(() => {
     const el = track.current
     const box = wrap.current
     if (!el || !box) return
     if (prefersReduced()) return
+    if (lite) return // faixa fica parada: um loop por quadro so para enfeite
 
     let x = 0
     let vel = 0
@@ -183,7 +192,7 @@ export function ScrollVelocity({ text, className = '', baseSpeed = 0.6 }) {
       window.removeEventListener('scroll', onScroll)
       window.removeEventListener('resize', measure)
     }
-  }, [baseSpeed])
+  }, [baseSpeed, lite])
 
   return (
     <div ref={wrap} className={`overflow-hidden ${className}`} aria-hidden="true">
@@ -208,12 +217,14 @@ export function ScrollVelocity({ text, className = '', baseSpeed = 0.6 }) {
 /* ------------------------------------------------------------------ */
 export function DotGrid({ className = '', gap = 34, radius = 130 }) {
   const ref = useRef(null)
+  const lite = useLite()
 
   useEffect(() => {
     const cv = ref.current
     if (!cv) return
     const ctx = cv.getContext('2d', { alpha: true })
-    const reduced = prefersReduced()
+    // em maquina fraca a malha vira desenho parado: sem reagir ao cursor
+    const reduced = prefersReduced() || lite
     const touch = window.matchMedia('(hover: none)').matches
 
     let dots = []
@@ -340,7 +351,7 @@ export function DotGrid({ className = '', gap = 34, radius = 130 }) {
       window.removeEventListener('resize', onResize)
       cv.removeEventListener('mouseleave', onLeave)
     }
-  }, [gap, radius])
+  }, [gap, radius, lite])
 
   return <canvas ref={ref} className={className} aria-hidden="true" />
 }
@@ -353,7 +364,8 @@ export function Intro() {
   const root = useRef(null)
 
   useEffect(() => {
-    if (prefersReduced()) { setDone(true); return }
+    // maquina fraca nao ganha nada com cortina de abertura: e so atraso
+    if (prefersReduced() || isLite()) { setDone(true); return }
     const ctx = gsap.context(() => {
       const tl = gsap.timeline({ onComplete: () => setDone(true) })
       tl.to('.intro-word', { opacity: 1, y: 0, duration: 0.9, ease: 'expo.out', stagger: 0.09 }, 0.15)

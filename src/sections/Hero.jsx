@@ -1,6 +1,7 @@
 import { lazy, Suspense, useEffect, useRef, useState } from 'react'
 import { Magnetic } from '../components/ui'
 import { gsap, splitChars, whenFontsReady, prefersReduced } from '../lib/anim'
+import { useLite } from '../lib/device'
 import { CONTACT } from '../data/content'
 
 // A aurora carrega o ogl (WebGL) junto. Fora do pacote principal, ela nao
@@ -13,14 +14,16 @@ export default function Hero() {
   const l1 = useRef(null)
   const l2 = useRef(null)
   const [auroraOn, setAuroraOn] = useState(false)
+  const lite = useLite()
 
-  // so monta a aurora quando o navegador estiver ocioso
+  // so monta a aurora quando o navegador estiver ocioso — e nunca em maquina fraca
   useEffect(() => {
+    if (lite) { setAuroraOn(false); return }
     const idle = window.requestIdleCallback ?? ((fn) => setTimeout(fn, 400))
     const cancel = window.cancelIdleCallback ?? clearTimeout
     const id = idle(() => setAuroraOn(true), { timeout: 2000 })
     return () => cancel(id)
-  }, [])
+  }, [lite])
 
   useEffect(() => {
     const ctx = gsap.context(() => {
@@ -53,6 +56,10 @@ export default function Hero() {
           .from('.hero-scroll', { opacity: 0, duration: 1 }, 1.4)
       })
 
+      // parallax: dois elementos redesenhados a cada quadro de rolagem.
+      // Em maquina fraca fica tudo parado.
+      if (lite) return
+
       // parallax suave do conteudo ao rolar
       gsap.to('.hero-inner', {
         yPercent: 8,
@@ -72,7 +79,7 @@ export default function Hero() {
     }, root)
 
     return () => ctx.revert()
-  }, [])
+  }, [lite])
 
   return (
     <section ref={root} id="top" className="noise relative min-h-[100svh] overflow-hidden">

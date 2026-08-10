@@ -1,6 +1,7 @@
 import { useEffect, useRef } from 'react'
 import Lenis from 'lenis'
 import { gsap, ScrollTrigger, prefersReduced } from './lib/anim'
+import { useLite } from './lib/device'
 import { CONTACT } from './data/content'
 
 import { Cursor, Intro, ScrollVelocity } from './components/fx'
@@ -110,8 +111,15 @@ function WhatsFab({ ref }) {
 }
 
 export default function App() {
+  const lite = useLite()
+
   useEffect(() => {
     if (prefersReduced()) return
+    // Em maquina fraca a rolagem volta a ser a do proprio navegador: e o
+    // unico jeito de ela nao depender do JS conseguir entregar o frame.
+    // (o ScrollTrigger sozinho ja escuta a rolagem nativa; as ancoras usam o
+    // scroll-behavior do CSS)
+    if (lite) return
 
     // Medido: com duration 1.05 a pagina continuava andando ~700ms depois do
     // ultimo giro da roda. E isso que se sente como "pesado" — nao ha quadro
@@ -141,7 +149,7 @@ export default function App() {
       gsap.ticker.remove(raf)
       lenis.destroy()
     }
-  }, [])
+  }, [lite])
 
   return (
     <>

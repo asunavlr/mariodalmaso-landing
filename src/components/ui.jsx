@@ -1,5 +1,6 @@
 import { useEffect, useRef, Children } from 'react'
 import { gsap, ScrollTrigger, EASE, splitChars, whenFontsReady, prefersReduced } from '../lib/anim'
+import { useLite } from '../lib/device'
 
 /* ------------------------------------------------------------------ */
 /* SplitText — headline entrando caractere a caractere no scroll       */
@@ -226,10 +227,11 @@ export function SpotlightCard({ children, className = '', spotlight = 'rgba(212,
 /* ------------------------------------------------------------------ */
 export function Magnetic({ children, strength = 0.32, className = '' }) {
   const ref = useRef(null)
+  const lite = useLite()
 
   useEffect(() => {
     const el = ref.current
-    if (!el || prefersReduced()) return
+    if (!el || prefersReduced() || lite) return
     const xTo = gsap.quickTo(el, 'x', { duration: 0.7, ease: 'elastic.out(1, 0.4)' })
     const yTo = gsap.quickTo(el, 'y', { duration: 0.7, ease: 'elastic.out(1, 0.4)' })
 
@@ -246,7 +248,7 @@ export function Magnetic({ children, strength = 0.32, className = '' }) {
       el.removeEventListener('mousemove', move)
       el.removeEventListener('mouseleave', leave)
     }
-  }, [strength])
+  }, [strength, lite])
 
   return (
     <div ref={ref} className={`inline-block ${className}`}>
